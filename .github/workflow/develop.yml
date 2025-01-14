@@ -1,0 +1,50 @@
+name: CI/CD for Develop Branch
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.1'
+
+    - name: Install dependencies
+      run: |
+        gem install bundler
+        bundle install
+
+    - name: Lint code with RuboCop
+      run: |
+        gem install rubocop
+        rubocop
+
+    - name: Check for Vulnerabilities with Bundler-Audit
+      run: |
+        gem install bundler-audit
+        bundle exec bundler-audit update
+        bundle exec bundler-audit check
+
+    - name: Run Unit Tests with RSpec
+      run: |
+        gem install rspec
+        bundle exec rspec
+
+    - name: Build Docker image
+      run: |
+        docker build -t myapp:develop .
+
+    - name: Push Docker image to Docker Hub
+      run: |
+        echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        docker tag myapp:develop ${{ secrets.DOCKER_USERNAME }}/myapp:develop
+        docker push ${{ secrets.DOCKER_USERNAME }}/myapp:develop
