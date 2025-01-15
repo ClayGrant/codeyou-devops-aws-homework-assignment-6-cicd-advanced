@@ -3,7 +3,7 @@
 source 'https://rubygems.org'
 
 gem 'bundler-audit'
-gem 'loofah', '2.2.3'
+gem 'loofah', '2.19.1'
 gem 'puma'
 gem 'rack'
 gem 'rackup'
